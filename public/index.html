@@ -240,7 +240,7 @@
   <div class="shell">
     <header class="top">
       <h1 class="display">Catalog</h1>
-      <p>Browsing <span class="count">200,000</span> products, newest first — filtered live, no page reloads.</p>
+      <p>Browsing <span class="count">200,000</span> products, newest first-filtered live, no page reloads.</p>
     </header>
 
     <nav class="rail">
@@ -323,7 +323,9 @@
     }
 
     async function loadPage(reset) {
-      if (loading) return;
+      if (loading) {
+        loading = false;
+}
       loading = true;
 
       if (reset) {

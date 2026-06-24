@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Catalog — Product Browser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f3;
+    --surface: #ffffff;
+    --ink: #14181c;
+    --ink-muted: #6b7280;
+    --line: #e3e5e1;
+    --teal: #1f6f5c;
+    --teal-dark: #154f41;
+    --amber: #c97d12;
+    --amber-soft: #fbeed9;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .display { font-family: "Space Grotesk", sans-serif; }
+  .mono { font-family: "IBM Plex Mono", monospace; }
+
+  a, button, select, input { font-family: inherit; }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2.5rem;
+  }
+
+  @media (max-width: 760px) {
+    .shell { grid-template-columns: 1fr; }
+  }
+
+  header.top {
+    grid-column: 1 / -1;
+    margin-bottom: 0.5rem;
+  }
+  header.top h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin: 0 0 0.35rem;
+    letter-spacing: -0.01em;
+  }
+  header.top p {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+  }
+  header.top .count {
+    color: var(--teal);
+    font-weight: 600;
+  }
+
+  .rail {
+    align-self: start;
+  }
+  .rail-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    margin: 0 0 0.6rem;
+    font-weight: 600;
+  }
+  .rail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .rail-btn {
+    text-align: left;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.88rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .rail-btn:hover { background: var(--surface); }
+  .rail-btn.active {
+    background: var(--teal);
+    color: white;
+    font-weight: 600;
+  }
+  .rail-btn:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 760px) {
+    .rail-list { flex-direction: row; flex-wrap: wrap; }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 0.9rem;
+    align-content: start;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem 1rem;
+    position: relative;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    animation: rise 0.28s ease both;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--teal);
+    box-shadow: 0 6px 18px -10px rgba(20, 24, 28, 0.25);
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .sku {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.03em;
+    margin-bottom: 0.45rem;
+  }
+
+  .card h3 {
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    line-height: 1.25;
+  }
+
+  .chip {
+    display: inline-block;
+    background: var(--amber-soft);
+    color: var(--amber);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.18rem 0.55rem;
+    border-radius: 100px;
+    margin-bottom: 0.6rem;
+  }
+
+  .card .price {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--teal-dark);
+  }
+
+  .card .age {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.74rem;
+    color: var(--ink-muted);
+  }
+
+  .skeleton {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem 1rem;
+    height: 108px;
+  }
+  .skeleton .bar {
+    height: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--line) 25%, #eef0ec 37%, var(--line) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.3s ease infinite;
+    margin-bottom: 0.55rem;
+  }
+  .skeleton .bar.w60 { width: 60%; }
+  .skeleton .bar.w90 { width: 90%; }
+  .skeleton .bar.w40 { width: 40%; }
+
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  .load-row {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  #loadMore {
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 0.6rem 1.4rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  #loadMore:hover:not(:disabled) { background: var(--teal-dark); }
+  #loadMore:disabled { background: var(--line); color: var(--ink-muted); cursor: default; }
+  #loadMore:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+  .empty, .error {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+  }
+  .error { color: #a3331f; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card, #loadMore, .skeleton .bar { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <h1 class="display">Catalog</h1>
+      <p>Browsing <span class="count">200,000</span> products, newest first — filtered live, no page reloads.</p>
+    </header>
+
+    <nav class="rail">
+      <p class="rail-label">Category</p>
+      <div class="rail-list" id="railList">
+        <button class="rail-btn active" data-category="">All</button>
+      </div>
+    </nav>
+
+    <main class="grid" id="grid"></main>
+
+    <div class="load-row">
+      <button id="loadMore">Load more</button>
+    </div>
+  </div>
+
+  <script>
+    const CATEGORIES = ['Electronics','Books','Clothing','Home & Kitchen','Sports','Toys','Beauty','Automotive','Garden','Groceries'];
+    const railList = document.getElementById('railList');
+    const grid = document.getElementById('grid');
+    const loadMoreBtn = document.getElementById('loadMore');
+
+    let nextCursor = null;
+    let currentCategory = '';
+    let loading = false;
+
+    CATEGORIES.forEach((c) => {
+      const btn = document.createElement('button');
+      btn.className = 'rail-btn';
+      btn.dataset.category = c;
+      btn.textContent = c;
+      railList.appendChild(btn);
+    });
+
+    function timeAgo(iso) {
+      const diffMs = Date.now() - new Date(iso).getTime();
+      const mins = Math.floor(diffMs / 60000);
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      return `${Math.floor(hrs / 24)}d ago`;
+    }
+
+    function skuFor(id) {
+      return `SKU-${String(id).padStart(6, '0')}`;
+    }
+
+    function formatPrice(price) {
+      // en-IN groups digits the Indian way (lakhs/crores: 1,23,456 not
+      // 123,456) instead of the Western 3-digit grouping toLocaleString
+      // would use by default with no locale specified.
+      const n = Number(price);
+      return `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function renderSkeletons(count) {
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement('div');
+        s.className = 'skeleton';
+        s.innerHTML = `<div class="bar w40"></div><div class="bar w90"></div><div class="bar w60"></div>`;
+        grid.appendChild(s);
+      }
+    }
+
+    function clearSkeletons() {
+      grid.querySelectorAll('.skeleton').forEach((el) => el.remove());
+    }
+
+    function renderCard(p) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <span class="sku mono">${skuFor(p.id)}</span>
+        <h3 class="display">${p.name}</h3>
+        <span class="chip">${p.category}</span>
+        <div class="price mono">${formatPrice(p.price)}</div>
+        <span class="age">added ${timeAgo(p.created_at)}</span>
+      `;
+      grid.appendChild(card);
+    }
+
+    async function loadPage(reset) {
+      if (loading) return;
+      loading = true;
+
+      if (reset) {
+        grid.innerHTML = '';
+        nextCursor = null;
+      }
+      grid.querySelectorAll('.empty, .error').forEach((el) => el.remove());
+      renderSkeletons(reset ? 8 : 4);
+      loadMoreBtn.disabled = true;
+
+      try {
+        const params = new URLSearchParams({ limit: 20 });
+        if (currentCategory) params.set('category', currentCategory);
+        if (nextCursor) params.set('cursor', nextCursor);
+
+        const res = await fetch(`/api/products?${params}`);
+        if (!res.ok) throw new Error('Request failed');
+        const data = await res.json();
+
+        clearSkeletons();
+
+        if (reset && data.items.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'empty';
+          empty.textContent = currentCategory
+            ? `No products found in ${currentCategory} yet.`
+            : 'No products found.';
+          grid.appendChild(empty);
+        } else {
+          data.items.forEach(renderCard);
+        }
+
+        nextCursor = data.nextCursor;
+        loadMoreBtn.disabled = !data.hasMore;
+      } catch (err) {
+        clearSkeletons();
+        const errEl = document.createElement('div');
+        errEl.className = 'error';
+        errEl.textContent = "Couldn't load products — check that the API is running.";
+        grid.appendChild(errEl);
+        loadMoreBtn.disabled = true;
+      } finally {
+        loading = false;
+      }
+    }
+
+    railList.addEventListener('click', (e) => {
+      const btn = e.target.closest('.rail-btn');
+      if (!btn) return;
+      railList.querySelectorAll('.rail-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = btn.dataset.category;
+      loadPage(true);
+    });
+
+    loadMoreBtn.addEventListener('click', () => loadPage(false));
+
+    loadPage(true);
+  </script>
+</body>
+</html>

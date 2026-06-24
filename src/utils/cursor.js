@@ -11,7 +11,7 @@ function decodeCursor(cursorStr){
     if(!c || i===undefined || i===null){
       throw new Error('Malformed cursor payload');
     }
-    return {cretaedAt: c, id: Number(i)};
+    return {createdAt: c, id: Number(i)};
 
   }catch(err){
     const e= new Error('invalid cursor');
